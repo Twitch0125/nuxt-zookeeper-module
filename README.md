@@ -15,6 +15,7 @@ what I plan for this module
   -  ⚠️ We can't save to runtimeConfig because that doesn't change at runtime.
   - We can save to storage under a "public" prefix and use `useState` to provide them client side
   - Or we can provide a `/__zookeeper__/variables` api route and provide some utils for fetching from that endpoint
+- hooks for zookeeper events
 
 uses [node-zookeeper](https://github.com/yfinkelstein/node-zookeeper) for the zookeeper client
 
