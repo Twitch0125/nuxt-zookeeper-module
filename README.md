@@ -8,6 +8,15 @@ Find and replace all on all files (CMD+SHIFT+F):
 -->
 
 # 🚧 UNDER CONSTRUCTION 🚧
+what I plan for this module
+
+- This module will be able to retrieve zookeeper variables on server start and save them to in in-memory [unstorage](https://github.com/unjs/unstorage) instance.
+- variables should be private by default
+  -  ⚠️ We can't save to runtimeConfig because that doesn't change at runtime.
+  - We can save to storage under a "public" prefix and use `useState` to provide them client side
+  - Or we can provide a `/__zookeeper__/variables` api route and provide some utils for fetching from that endpoint
+
+
 
 # nuxt-zookeeper-module
 
