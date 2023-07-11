@@ -16,6 +16,12 @@ what I plan for this module
   - We can save to storage under a "public" prefix and use `useState` to provide them client side
   - Or we can provide a `/__zookeeper__/variables` api route and provide some utils for fetching from that endpoint
 
+uses [node-zookeeper](https://github.com/yfinkelstein/node-zookeeper) for the zookeeper client
+
+## Possible future enhancements
+
+- Listening to zookeeper variable changes
+- zookeeper unstorage layer
 
 
 # nuxt-zookeeper-module
