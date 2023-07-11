@@ -1,11 +1,13 @@
 <template>
   <div>
     Nuxt module playground!
-    {{ publicVars }}
+  </div>
+  <div>
+    env: {{ env }}
   </div>
 </template>
 
 <script setup>
-import { useRuntimeConfig } from "#imports";
-const publicVars = useRuntimeConfig().public.zookeeper;
+import { useFetch } from "#imports";
+const { data: env } = await useFetch("/api/env");
 </script>

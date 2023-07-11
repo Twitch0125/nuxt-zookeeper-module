@@ -5,9 +5,9 @@ export default defineNuxtConfig({
       connect: "localhost:2181",
     },
     variables: {
-      "/app/secret": "secret",
+      "/app/secret": "app-secret",
       public: {
-        "/app/name": "nuxt-zookeeper-app",
+        "/app/name": "app-name",
       },
     },
   },

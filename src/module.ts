@@ -1,7 +1,10 @@
-import { defineNuxtModule, createResolver, addServerPlugin } from "@nuxt/kit";
+import {
+  defineNuxtModule,
+  createResolver,
+  addServerPlugin,
+  addPlugin,
+} from "@nuxt/kit";
 import { defu } from "defu";
-import ZookeeperModule from "zookeeper";
-const { constants } = ZookeeperModule;
 // Module options TypeScript interface definition
 /**
  * Extends config options from node-zookeeper
@@ -39,7 +42,7 @@ export default defineNuxtModule<ModuleOptions>({
       connect: "",
       timeout: 5000,
       host_order_deterministic: false,
-      debug_level: constants.ZOO_LOG_LEVEL_INFO,
+      debug_level: 1,
     },
     namespace: "zookeeper",
     variables: {
@@ -71,11 +74,8 @@ export default defineNuxtModule<ModuleOptions>({
         },
       },
     });
-
-    //node-zookeeper is currently common-js only
-    nuxt.options.build.transpile.push("zookeeper");
-
     const resolver = createResolver(import.meta.url);
-    addServerPlugin(resolver.resolve("./runtime/plugin.server"));
+    addServerPlugin(resolver.resolve("./runtime/server/plugin"));
+    addPlugin(resolver.resolve("./runtime/plugin.server"));
   },
 });
