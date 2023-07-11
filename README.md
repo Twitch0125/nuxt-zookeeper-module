@@ -7,6 +7,8 @@ Find and replace all on all files (CMD+SHIFT+F):
 - Description: My new Nuxt module
 -->
 
+# 🚧 UNDER CONSTRUCTION 🚧
+
 # nuxt-zookeeper-module
 
 [![npm version][npm-version-src]][npm-version-href]
