@@ -1,6 +1,4 @@
-import ZookeeperModule from "zookeeper";
-const { Promise: Zookeeper } = ZookeeperModule;
-
+import Zookeeper from "zookeeper";
 export default defineNitroPlugin(async (nitroApp) => {
   const zkRuntimeConfig = useRuntimeConfig().zookeeper;
   const config = zkRuntimeConfig.config;
@@ -15,13 +13,16 @@ export default defineNitroPlugin(async (nitroApp) => {
   });
   //iterate through public variables first
   if (publicVariables) {
-    await readVariables(publicVariables, true);
+    await readVariables(client, publicVariables);
   }
-  await readVariables(privateVariables);
+  await readVariables(client, privateVariables);
 });
 
-async function readVariables(variables: Record<string, string>) {
-  const storage = useStorage(zkRuntimeConfig.namespace);
+async function readVariables(
+  client: Zookeeper,
+  variables: Record<string, string>
+) {
+  const storage = useStorage(useRuntimeConfig().zookeeper.namespace);
   await Promise.all(
     Object.entries(variables).map(async ([path, name]) => {
       if (typeof name !== "string") {

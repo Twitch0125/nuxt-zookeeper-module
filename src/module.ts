@@ -76,6 +76,6 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.build.transpile.push("zookeeper");
 
     const resolver = createResolver(import.meta.url);
-    addServerPlugin(resolver.resolve("./runtime/plugin.server.ts"));
+    addServerPlugin(resolver.resolve("./runtime/plugin.server"));
   },
 });
