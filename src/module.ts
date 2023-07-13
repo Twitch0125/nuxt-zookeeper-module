@@ -3,24 +3,23 @@ import {
   createResolver,
   addServerPlugin,
   addPlugin,
+  addServerHandler,
 } from "@nuxt/kit";
 import { defu } from "defu";
 // Module options TypeScript interface definition
 /**
- * Extends config options from node-zookeeper
- * @see https://github.com/yfinkelstein/node-zookeeper/tree/master */
+ * Extends config options from node-zookeeper-client
+ * @see https://github.com/alexguan/node-zookeeper-client#client-createclientconnectionstring-options */
 export interface ModuleOptions {
   config: {
     /** host url */
-    connect?: string;
-    /** number of ms */
-    timeout?: number;
-    /** TBD */
-    host_order_deterministic?: boolean;
-    /** TBD
-     * @see https://github.com/yfinkelstein/node-zookeeper/blob/master/lib/zookeeper.js#L556-L574
-     */
-    debug_level?: number;
+    connectionString?: string;
+    /** Session timeout in milliseconds @default 30000 */
+    sessionTimeout?: number;
+    /** The delay (in milliseconds) between each connection attempts. @default 1000*/
+    spinDelay?: number;
+    /** The number of retry attempts for connection loss exception. @default 0 */
+    retries?: number;
   };
   variables: VariablesConfig;
   /** by default, variables are accessible under a 'zookeeper' namespace in the runtimeConfig. You can change that here */
@@ -39,10 +38,9 @@ export default defineNuxtModule<ModuleOptions>({
   // Default configuration options of the Nuxt module
   defaults: {
     config: {
-      connect: "",
-      timeout: 5000,
-      host_order_deterministic: false,
-      debug_level: 1,
+      sessionTimeout: 30000,
+      spinDelay: 1000,
+      retries: 0,
     },
     namespace: "zookeeper",
     variables: {
@@ -76,6 +74,10 @@ export default defineNuxtModule<ModuleOptions>({
     });
     const resolver = createResolver(import.meta.url);
     addServerPlugin(resolver.resolve("./runtime/server/plugin"));
+    addServerHandler({
+      middleware: true,
+      handler: resolver.resolve("./runtime/server/middleware"),
+    });
     addPlugin(resolver.resolve("./runtime/plugin.server"));
   },
 });

@@ -17,7 +17,7 @@ what I plan for this module
   - Or we can provide a `/__zookeeper__/variables` api route and provide some utils for fetching from that endpoint
 - hooks for zookeeper events
 
-uses [node-zookeeper](https://github.com/yfinkelstein/node-zookeeper) for the zookeeper client
+uses [node-zookeeper-client](https://github.com/alexguan/node-zookeeper-client) for the zookeeper client
 
 ## Possible future enhancements
 

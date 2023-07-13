@@ -1,54 +1,75 @@
 import { defineNitroPlugin, useRuntimeConfig, useStorage } from "#imports";
-import Zookeeper from "zookeeper";
+import { createClient, type Client } from "node-zookeeper-client";
+
 export default defineNitroPlugin(async () => {
   const zkRuntimeConfig = useRuntimeConfig().zookeeper;
-  const config = zkRuntimeConfig.config;
+  const { connectionString, ...config } = zkRuntimeConfig.config;
   const privateVariables = zkRuntimeConfig.variables;
   const publicVariables = useRuntimeConfig().public.zookeeper.variables;
-  const client = new Zookeeper(config);
-  await new Promise((resolve) => {
-    client.init({});
-    client.on("connect", () => {
-      console.log("connected to zookeeper");
-      resolve(true);
+  const client = createClient(connectionString, config);
+  const connectPromise = new Promise<void>((resolve) => {
+    client.once("connected", () => {
+      console.log("zookeeper: connected");
+      resolve();
     });
+    client.connect();
   });
-  //iterate through public variables first
-  await Promise.all([
-    readVariables(client, publicVariables),
-    readVariables(client, privateVariables),
-  ]);
-  await client.close();
-  console.log("closed zookeeper connection");
+  await connectPromise;
+  if (publicVariables) {
+    await readVariables(client, publicVariables, true);
+  }
+  await readVariables(client, privateVariables);
+  const disconnectPromise = new Promise<void>((resolve) => {
+    client.once("disconnected", () => {
+      console.log("zookeeper: disconnected");
+      resolve();
+    });
+    client.close();
+  });
+  await disconnectPromise;
 });
 
 async function readVariables(
-  client: Zookeeper,
+  client: Client,
   variables: Record<string, string>,
+  isPublic: boolean = false
 ) {
-  if(!variables) return;
-  const storage = useStorage(useRuntimeConfig().zookeeper.namespace);
+  const namespace = useRuntimeConfig().zookeeper.namespace;
+  const storage = isPublic
+    ? useStorage(`${namespace}_public`)
+    : useStorage(namespace);
   await Promise.all(
     Object.entries(variables).map(async ([path, name]) => {
       if (typeof name !== "string") {
         console.error(
-          `value for zookeeper path ${path} should be a string. Maybe you have something wrong in your nuxt config?`
+          `zookeeper: value for zookeeper path ${path} should be a string. Maybe you have something wrong in your nuxt config?`
         );
         return;
       }
-      const doesExist = await client.pathExists(path, false);
+      const doesExist = await new Promise((resolve) => {
+        client.exists(path, (error, stat) => {
+          if (error || !stat) {
+            resolve(false);
+          }
+          resolve(stat);
+        });
+      });
       if (!doesExist) {
-        console.log("unable to find ", path);
+        console.log("zookeeper: could not find", path);
         return;
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [_metadata, data] = (await client.get(path, false)) as [
-        object,
-        Buffer
-      ];
+      const data = await new Promise<Buffer>((resolve, reject) => {
+        client.getData(path, (err, data) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(data);
+        });
+      });
       const value = data.toString();
+      console.log("zookeeper: found", path, value);
       await storage.setItem(name, value);
-      console.log(name, await storage.getItem(name));
     })
   );
 }
